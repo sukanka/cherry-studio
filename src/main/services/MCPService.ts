@@ -1,6 +1,8 @@
 import crypto from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
+import fs from "fs";
+
 
 import { loggerService } from '@logger'
 import { createInMemoryMCPServer } from '@main/mcpServers/factory'
@@ -715,12 +717,22 @@ class McpService {
   }
 
   public async getInstallInfo() {
-    const dir = path.join(os.homedir(), '.cherrystudio', 'bin')
-    const uvName = await getBinaryName('uv')
-    const bunName = await getBinaryName('bun')
-    const uvPath = path.join(dir, uvName)
-    const bunPath = path.join(dir, bunName)
-    return { dir, uvPath, bunPath }
+    const uvName = await getBinaryName("uv");
+    const bunName = await getBinaryName("bun");
+    const envpath = process.env["PATH"]?.split(":") || [];
+    if (envpath) {
+      for (const dir of envpath) {
+        const uvPath = path.join(dir, uvName);
+        const bunPath = path.join(dir, bunName);
+        if (fs.existsSync(uvPath) && fs.existsSync(bunPath)) {
+          return { dir, uvPath, bunPath };
+        }
+      }
+    }
+    const dir = path.join(os.homedir(), ".cherrystudio", "bin");
+    const uvPath = path.join(dir, uvName);
+    const bunPath = path.join(dir, bunName);
+    return { dir, uvPath, bunPath };
   }
 
   /**

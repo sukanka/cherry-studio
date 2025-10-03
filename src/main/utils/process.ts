@@ -43,6 +43,10 @@ export async function getBinaryName(name: string): Promise<string> {
   }
   return name
 }
+export  function getEnvPath(): string[]{
+  const path = process.env['PATH']?.split(":")
+  return path || []
+}
 
 export async function getBinaryPath(name?: string): Promise<string> {
   if (!name) {
@@ -50,10 +54,18 @@ export async function getBinaryPath(name?: string): Promise<string> {
   }
 
   const binaryName = await getBinaryName(name)
+  const envPath=getEnvPath()
+  for (const p of envPath) {
+    const binPath=path.join(p, binaryName)
+    if (fs.existsSync(binPath)) {
+      return binPath
+    }
+  }
   const binariesDir = path.join(os.homedir(), '.cherrystudio', 'bin')
   const binariesDirExists = fs.existsSync(binariesDir)
   return binariesDirExists ? path.join(binariesDir, binaryName) : binaryName
 }
+
 
 export async function isBinaryExists(name: string): Promise<boolean> {
   const cmd = await getBinaryPath(name)

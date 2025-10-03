@@ -67,6 +67,13 @@ class CodeToolsService {
   }
 
   public async getBunPath() {
+    const envPath = process.env["PATH"]?.split(":") || [];
+    for (const p of envPath) {
+      const binPath = path.join(p, "bun");
+      if (fs.existsSync(binPath)) {
+        return binPath;
+      }
+    }
     const dir = path.join(os.homedir(), '.cherrystudio', 'bin')
     const bunName = await getBinaryName('bun')
     const bunPath = path.join(dir, bunName)
