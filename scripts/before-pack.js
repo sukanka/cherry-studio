@@ -1,10 +1,7 @@
 const { Arch } = require('electron-builder')
-const { execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const { parse } = require('yaml')
-
-const { ensureLinuxNativeArtifact } = require('./linux-native/download')
 
 // if you want to add new prebuild binaries packages with different architectures, you can add them here
 // please add to allX64 and allArm64 from pnpm-lock.yaml
@@ -112,23 +109,6 @@ exports.default = async function (context) {
   const platform = platformToArch[platformName]
 
   assertPrebuiltPackages(platform, arch)
-
-  if (platform === 'linux') {
-    const linuxArch = context.arch === Arch.arm64 ? 'arm64' : context.arch === Arch.x64 ? 'x64' : null
-    if (!linuxArch) throw new Error(`Unsupported Linux packaging architecture: ${context.arch}`)
-
-    const projectRoot = path.join(__dirname, '..')
-    const artifact = ensureLinuxNativeArtifact({ projectRoot, arch: linuxArch })
-    process.stdout.write(
-      `${artifact.cached ? 'Verified cached' : 'Downloaded'} GLIBC-compatible better-sqlite3 for ` +
-        `linux-${linuxArch} (${artifact.inspection.sha256})\n`
-    )
-  }
-
-  console.log(`Downloading bundled binaries for ${platform}-${arch}...`)
-  execSync(`node "${path.join(__dirname, 'download-binaries.js')}" ${platform} ${arch}`, { stdio: 'inherit' })
-  // Fail the build rather than ship a half-empty resources/binaries/<platform>.
-  require('./download-binaries').verifyBundledBinaries(platform, arch)
 
   const excludePackages = async (packagesToExclude) => {
     // 从项目根目录的 electron-builder.yml 读取 files 配置，避免多次覆盖配置导致出错

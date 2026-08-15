@@ -53,7 +53,7 @@ export function buildPathRegistry() {
   const sysTemp = app.getPath('temp')
   const appTemp = path.join(sysTemp, 'CherryStudio')
   // electron-builder `extraResources` output — distinct from appRootResources
-  const appExtraResources = process.resourcesPath
+  const appExtraResources = app.isPackaged ? path.dirname(app.getAppPath()) : process.resourcesPath
   // `resources/` inside asar (bundled assets) — distinct from appExtraResources
   const appRootResources = path.join(app.getAppPath(), 'resources')
 

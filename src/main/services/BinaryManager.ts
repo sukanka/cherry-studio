@@ -138,29 +138,15 @@ function isPathWithin(root: string, candidate: string): boolean {
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
 }
 
-// Single source of truth for tools shipped inside the app and extracted at
-// boot. `internal` marks infrastructure (mise) excluded from the UI probe.
-// Binary names are base names; .exe is appended on Windows at use sites.
-// NOTE: the build-time list in scripts/download-binaries.js is intentionally
-// separate — it additionally carries per-platform download URLs and checksums.
+// Arch Linux provides these tools as package dependencies. Keeping this list
+// empty disables extraction and prevents stale bundled copies from being used.
 const BUNDLED_TOOLS: Array<{
   name: string
   binaries: string[]
   windowsBinaries?: string[]
   versionFile: string
   internal?: boolean
-}> = [
-  {
-    name: 'mise',
-    binaries: ['mise'],
-    windowsBinaries: ['mise-shim'],
-    versionFile: '.mise-version',
-    internal: true
-  },
-  { name: 'bun', binaries: ['bun'], versionFile: '.bun-version' },
-  { name: 'uv', binaries: ['uv', 'uvx'], versionFile: '.uv-version' },
-  { name: 'rg', binaries: ['rg'], versionFile: '.rg-version' }
-]
+}> = []
 
 export type ManagedCliStatus = 'ready' | 'not_installed' | 'installing' | 'removing' | 'failed' | 'unknown'
 
@@ -728,11 +714,6 @@ export class BinaryManager extends BaseService {
   private async findMiseBin(): Promise<string | null> {
     const binaryName = getBinaryName('mise')
 
-    const cherryBin = path.join(application.getPath('cherry.bin'), binaryName)
-    if (fs.existsSync(cherryBin)) {
-      return cherryBin
-    }
-
     if (isWin) {
       return findMiseExecutable()
     }
@@ -789,7 +770,7 @@ export class BinaryManager extends BaseService {
     }
     if (installSettings.githubToken) env['GITHUB_TOKEN'] = installSettings.githubToken
 
-    // mise only defaults this when uv is already on PATH. Force bundled uv/uvx
+    // mise only defaults this when uv is already on PATH. Force the uvx backend
     // for pipx tools so installs do not depend on a separate pipx executable.
     env['MISE_PIPX_UVX'] = '1'
 
