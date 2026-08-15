@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { execFile } from 'node:child_process'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
@@ -19,7 +18,7 @@ import { sanitizedCommandError } from './commandError'
  * them through uv, which takes the interpreter from `UV_PYTHON`).
  *
  * mise can install Python itself, but only from GitHub releases — unreachable
- * from mainland China. The bundled uv can be pointed at a mirror instead, so
+ * from mainland China. The uv executable on PATH can use a mirror instead, so
  * provisioning lives here and mise is never told about Python at all.
  */
 
@@ -40,8 +39,7 @@ function installDir(): string {
 }
 
 async function runUv(args: string[], env: Record<string, string>, timeoutMs: number): Promise<string> {
-  const uvBin = application.getPath('cherry.bin', getBinaryName('uv'))
-  if (!fs.existsSync(uvBin)) throw new Error('Bundled uv is not available')
+  const uvBin = getBinaryName('uv')
   const cwd = application.getPath('app.temp')
   const { stdout } = await execFileAsync(uvBin, args, { cwd, env, timeout: timeoutMs })
   return stdout
