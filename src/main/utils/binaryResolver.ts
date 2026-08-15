@@ -6,9 +6,8 @@ import path from 'path'
 import { getBinarySearchDirs } from './binaryEnv'
 
 /**
- * Resolution for Cherry-managed binaries — turns a tool name into the on-disk
- * path of the bundled-or-installed executable, searching the layout defined by
- * `binaryEnv.getBinarySearchDirs()` (mise shims first, then `cherry.bin`).
+ * Resolution for Cherry-managed binaries — prefers a mise shim and otherwise
+ * returns the platform executable name for resolution through the system PATH.
  */
 
 export function getBinaryName(name: string): string {

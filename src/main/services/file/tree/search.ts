@@ -80,13 +80,11 @@ const EXCLUDED_DIRS = new Set([
 
 // ─── Ripgrep binary + execution ────────────────────────────────────────────
 
-// Ripgrep is a BinaryManager-managed tool: bundled into `cherry.bin` at boot
-// and overridable by a mise-installed copy. `getBinaryPath('rg')` resolves
-// that single source of truth (mise shim → cherry.bin); a bare `rg` fallback
-// fails the existsSync check below, surfacing as "binary not available".
+// Prefer a mise-installed ripgrep, then let the child process resolve the bare
+// executable name through PATH for distro-provided installations.
 async function resolveRipgrepBinary(): Promise<string | null> {
   const binaryPath = await getBinaryPath('rg')
-  return fs.existsSync(binaryPath) ? binaryPath : null
+  return path.isAbsolute(binaryPath) && !fs.existsSync(binaryPath) ? null : binaryPath
 }
 
 interface RipgrepResult {

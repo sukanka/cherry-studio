@@ -248,7 +248,7 @@ export function resolveMigrationPaths(): MigrationPathsResult {
     migrationLocalStorageExportFile: path.join(migrationLocalStorageExportDir, 'localStorage.json'),
     legacyConfigFile,
     migrationsFolder: app.isPackaged
-      ? path.join(process.resourcesPath, MIGRATIONS_BASE_PATH)
+      ? path.join(path.dirname(app.getAppPath()), MIGRATIONS_BASE_PATH)
       : path.join(__dirname, '../../', MIGRATIONS_BASE_PATH)
   })
 
